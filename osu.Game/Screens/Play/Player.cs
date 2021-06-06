@@ -243,6 +243,10 @@ namespace osu.Game.Screens.Play
             // this is intentionally done in two stages to ensure things are in a loaded state before exposing the ruleset to skin sources.
             GameplayClockContainer.Add(beatmapSkinProvider.WithChild(rulesetSkinProvider));
 
+            // Hook this into score processor for testing purposes
+            DrawableRuleset.HitObjectAdded += ScoreProcessor.AddHitObject;
+            DrawableRuleset.HitObjectRemoved += ScoreProcessor.RemoveHitObject;
+
             rulesetSkinProvider.AddRange(new[]
             {
                 // underlay and gameplay should have access the to skinning sources.

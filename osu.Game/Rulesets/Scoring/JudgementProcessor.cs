@@ -133,10 +133,32 @@ namespace osu.Game.Rulesets.Scoring
             }
         }
 
+        private int objectCount;
+
+        public void AddHitObject(HitObject hitObject)
+        {
+            // Add this object
+            ++objectCount;
+
+            // Add nested objects as well
+            foreach (var nestedHitObject in hitObject.NestedHitObjects)
+                AddHitObject(nestedHitObject);
+        }
+
+        public void RemoveHitObject(HitObject hitObject)
+        {
+            // Remove this object
+            --objectCount;
+
+            // Remove nested objects as well
+            foreach (var nestedHitObject in hitObject.NestedHitObjects)
+                RemoveHitObject(nestedHitObject);
+        }
+
         protected override void Update()
         {
             base.Update();
-            hasCompleted.Value = JudgedHits == MaxHits && (JudgedHits == 0 || lastAppliedResult.TimeAbsolute < Clock.CurrentTime);
+            hasCompleted.Value = JudgedHits == objectCount && (JudgedHits == 0 || lastAppliedResult.TimeAbsolute < Clock.CurrentTime);
         }
     }
 }

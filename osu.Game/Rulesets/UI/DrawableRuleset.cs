@@ -1,29 +1,29 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using osu.Framework.Allocation;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Game.Beatmaps;
-using osu.Game.Rulesets.Judgements;
-using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Objects.Drawables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using JetBrains.Annotations;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
+using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Input.Handlers;
 using osu.Game.Overlays;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Configuration;
+using osu.Game.Rulesets.Judgements;
+using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play;
@@ -237,6 +237,9 @@ namespace osu.Game.Rulesets.UI
                 Playfield.Add(drawableRepresentation);
             else
                 Playfield.Add(hitObject);
+
+            // Notify player, and in-turn judgement processor
+            HitObjectAdded?.Invoke(hitObject);
         }
 
         /// <summary>
@@ -249,12 +252,18 @@ namespace osu.Game.Rulesets.UI
         public bool RemoveHitObject(TObject hitObject)
         {
             if (Playfield.Remove(hitObject))
+            {
+                HitObjectRemoved?.Invoke(hitObject);
                 return true;
+            }
 
             // If the entry was not removed from the playfield, assume the hitobject is not being pooled and attempt a direct drawable removal.
             var drawableObject = Playfield.AllHitObjects.SingleOrDefault(d => d.HitObject == hitObject);
             if (drawableObject != null)
+            {
+                HitObjectRemoved?.Invoke(hitObject);
                 return Playfield.Remove(drawableObject);
+            }
 
             return false;
         }
@@ -397,6 +406,9 @@ namespace osu.Game.Rulesets.UI
         /// Invoked when a <see cref="JudgementResult"/> is being reverted by a <see cref="DrawableHitObject"/>.
         /// </summary>
         public abstract event Action<JudgementResult> RevertResult;
+
+        public Action<HitObject> HitObjectAdded;
+        public Action<HitObject> HitObjectRemoved;
 
         /// <summary>
         /// Whether a replay is currently loaded.
