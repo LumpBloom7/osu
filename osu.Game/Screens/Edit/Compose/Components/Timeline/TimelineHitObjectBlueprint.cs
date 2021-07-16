@@ -274,6 +274,8 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
             }
         }
 
+        protected override bool OnHover(HoverEvent e) => true;
+
         public class DragArea : Circle
         {
             private readonly HitObject hitObject;

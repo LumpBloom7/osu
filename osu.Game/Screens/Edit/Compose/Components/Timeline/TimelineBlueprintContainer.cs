@@ -134,8 +134,13 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
 
             Stack<HitObject> currentConcurrentObjects = new Stack<HitObject>();
 
+            bool objectHovered = false;
+
             foreach (var b in SelectionBlueprints.Reverse())
             {
+                if (b.IsHovered && currentConcurrentObjects.Count > 0)
+                    objectHovered = true;
+
                 // remove objects from the stack as long as their end time is in the past.
                 while (currentConcurrentObjects.TryPeek(out HitObject hitObject))
                 {
@@ -150,10 +155,15 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
                 if (currentConcurrentObjects.TryPeek(out HitObject h) && !Precision.AlmostEquals(h.StartTime, b.Item.StartTime, 1))
                 {
                     if (currentConcurrentObjects.Count >= stack_reset_count)
+                    {
                         currentConcurrentObjects.Clear();
+                    }
                 }
 
-                b.Y = -(stack_offset * currentConcurrentObjects.Count);
+                if (currentConcurrentObjects.Count == 0)
+                    objectHovered = false;
+
+                b.Y = -(stack_offset * currentConcurrentObjects.Count) - (objectHovered ? 15 : 0);
 
                 currentConcurrentObjects.Push(b.Item);
             }
