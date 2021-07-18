@@ -53,11 +53,26 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
         private readonly Container colouredComponents;
         private readonly OsuSpriteText comboIndexText;
 
+        private float stackedYPosition;
+
+        public float StackedYPosition
+        {
+            get => stackedYPosition;
+            set
+            {
+                if (stackedYPosition == value)
+                    return;
+
+                stackedYPosition = value;
+                this.MoveToY(value, 200, Easing.OutQuint);
+            }
+        }
+
         [Resolved]
         private ISkinSource skin { get; set; }
 
         public TimelineHitObjectBlueprint(HitObject item)
-            : base(item)
+                    : base(item)
         {
             Anchor = Anchor.CentreLeft;
             Origin = Anchor.CentreLeft;
@@ -275,6 +290,8 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
         }
 
         protected override bool OnHover(HoverEvent e) => true;
+
+
 
         public class DragArea : Circle
         {

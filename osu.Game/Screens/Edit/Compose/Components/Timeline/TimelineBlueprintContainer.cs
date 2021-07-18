@@ -163,7 +163,7 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
                 if (currentConcurrentObjects.Count == 0)
                     objectHovered = false;
 
-                b.Y = -(stack_offset * currentConcurrentObjects.Count) - (objectHovered ? 15 : 0);
+                ((TimelineHitObjectBlueprint)b).StackedYPosition = -(stack_offset * currentConcurrentObjects.Count) - (objectHovered ? 15 : 0);
 
                 currentConcurrentObjects.Push(b.Item);
             }
