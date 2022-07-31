@@ -12,6 +12,7 @@ using osu.Framework.Input.Events;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
+using osu.Game.Rulesets.Objects.Types;
 
 namespace osu.Game.Screens.Edit.Compose.Components
 {
@@ -99,6 +100,18 @@ namespace osu.Game.Screens.Edit.Compose.Components
             base.AddBlueprintFor(item);
         }
 
+        protected new void RemoveBlueprintFor(HitObject item)
+        {
+            if (item is IHasAdjustibleChildren ihac)
+                foreach (var child in ihac.AdjustibleHitObjects)
+                    base.RemoveBlueprintFor(child);
+
+            base.RemoveBlueprintFor(item);
+        }
+
+        protected override SelectionBlueprint<HitObject> CreateBlueprintFor(HitObject item) => null;
+
+
         /// <summary>
         /// Invoked when a <see cref="HitObject"/> has been transferred to another <see cref="DrawableHitObject"/>.
         /// </summary>
@@ -107,6 +120,8 @@ namespace osu.Game.Screens.Edit.Compose.Components
         protected virtual void TransferBlueprintFor(HitObject hitObject, DrawableHitObject drawableObject)
         {
         }
+
+        private Dictionary<IHasAdjustibleChildren, bool> revealedState = new Dictionary<IHasAdjustibleChildren, bool>();
 
         protected override void DragOperationCompleted()
         {
@@ -122,8 +137,39 @@ namespace osu.Game.Screens.Edit.Compose.Components
             if (!base.OnDoubleClick(e))
                 return false;
 
+            if (EditorClock?.CurrentTime == ClickedBlueprint.Item.StartTime && ClickedBlueprint.Item is IHasAdjustibleChildren ihac)
+            {
+                toggleChildrenVisibility(ihac);
+                return true;
+            }
+
             EditorClock?.SeekSmoothlyTo(ClickedBlueprint.Item.StartTime);
             return true;
+        }
+
+        private void toggleChildrenVisibility(IHasAdjustibleChildren ihac)
+        {
+            if (!revealedState.ContainsKey(ihac))
+            {
+                revealedState.Add(ihac, false);
+            }
+            if (revealedState[ihac])
+                hideChildren(ihac);
+            else
+                revealChildren(ihac);
+        }
+
+        private void revealChildren(IHasAdjustibleChildren ihac)
+        {
+            revealedState[ihac] = true;
+            foreach (var child in ihac.AdjustibleHitObjects)
+                AddBlueprintFor(child);
+        }
+        private void hideChildren(IHasAdjustibleChildren ihac)
+        {
+            revealedState[ihac] = false;
+            foreach (var child in ihac.AdjustibleHitObjects)
+                RemoveBlueprintFor(child);
         }
 
         protected override Container<SelectionBlueprint<HitObject>> CreateSelectionBlueprintContainer() => new HitObjectOrderedSelectionContainer { RelativeSizeAxes = Axes.Both };
