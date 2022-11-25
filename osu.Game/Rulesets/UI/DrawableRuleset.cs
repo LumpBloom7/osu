@@ -100,8 +100,6 @@ namespace osu.Game.Rulesets.UI
 
         private OnScreenDisplay onScreenDisplay;
 
-        private DrawableRulesetDependencies dependencies;
-
         /// <summary>
         /// Audio adjustments which are applied to the playfield.
         /// </summary>
@@ -153,9 +151,9 @@ namespace osu.Game.Rulesets.UI
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent)
         {
-            dependencies = new DrawableRulesetDependencies(Ruleset, base.CreateChildDependencies(parent));
+            var dependencies = base.CreateChildDependencies(parent);
 
-            Config = dependencies.RulesetConfigManager;
+            Config = dependencies.Get<IRulesetConfigManager>();
 
             onScreenDisplay = dependencies.Get<OnScreenDisplay>();
             if (Config != null)
@@ -401,9 +399,6 @@ namespace osu.Game.Rulesets.UI
                 onScreenDisplay?.StopTracking(this, Config);
                 Config = null;
             }
-
-            // Dispose the components created by this dependency container.
-            dependencies?.Dispose();
         }
     }
 

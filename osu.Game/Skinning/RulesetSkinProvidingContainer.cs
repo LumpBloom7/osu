@@ -8,11 +8,8 @@ using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
-using osu.Framework.Audio;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.IO.Stores;
-using osu.Framework.Platform;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.UI;
@@ -51,13 +48,14 @@ namespace osu.Game.Skinning
         }
 
         private ResourceStoreBackedSkin rulesetResourcesSkin;
+        private DrawableRulesetDependencies rulesetDependencies;
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent)
         {
-            if (Ruleset.CreateResourceStore() is IResourceStore<byte[]> resources)
-                rulesetResourcesSkin = new ResourceStoreBackedSkin(resources, parent.Get<GameHost>(), parent.Get<AudioManager>());
+            rulesetDependencies = new DrawableRulesetDependencies(Ruleset, parent);
+            rulesetResourcesSkin = new ResourceStoreBackedSkin(rulesetDependencies.TextureStore, rulesetDependencies.SampleStore);
 
-            return base.CreateChildDependencies(parent);
+            return base.CreateChildDependencies(rulesetDependencies);
         }
 
         protected override void RefreshSources()
@@ -111,7 +109,7 @@ namespace osu.Game.Skinning
         {
             base.Dispose(isDisposing);
 
-            rulesetResourcesSkin?.Dispose();
+            rulesetDependencies?.Dispose();
         }
     }
 }
