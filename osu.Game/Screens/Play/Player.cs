@@ -254,10 +254,14 @@ namespace osu.Game.Screens.Play
             dependencies.CacheAs(GameplayState = new GameplayState(playableBeatmap, ruleset, gameplayMods, Score, ScoreProcessor));
 
             var rulesetSkinProvider = new RulesetSkinProvidingContainer(ruleset, playableBeatmap, Beatmap.Value.Skin);
+            var rulesetDependenciesProvider = new DrawableRulesetDependenciesProvidingContainer(ruleset)
+            {
+                Child = rulesetSkinProvider
+            };
 
             // load the skinning hierarchy first.
             // this is intentionally done in two stages to ensure things are in a loaded state before exposing the ruleset to skin sources.
-            GameplayClockContainer.Add(rulesetSkinProvider);
+            GameplayClockContainer.Add(rulesetDependenciesProvider);
 
             if (cancellationToken.IsCancellationRequested)
                 return;
